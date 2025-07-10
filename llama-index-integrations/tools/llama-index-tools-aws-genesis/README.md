@@ -53,9 +53,13 @@ agent = FunctionAgent(
     llm=llm,
 )
 
-start_response = await agent.run("Start a browser session and navigate to google.com.")
+start_response = await agent.run(
+    "Start a browser session and navigate to google.com."
+)
 print(str(start_response))
-view_response = await agent.run("Return a URL to view the current browser session.")
+view_response = await agent.run(
+    "Return a URL to view the current browser session."
+)
 print(str(view_response))
 stop_response = await agent.run("Stop the browser session.")
 print(str(stop_response))
