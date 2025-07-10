@@ -16,11 +16,7 @@ DEFAULT_CODE_INTERPRETER_TIMEOUT = 900
 
 def get_aws_region() -> str:
     """Get the AWS region from environment variables or use default."""
-    return (
-        os.getenv('AWS_REGION') or 
-        os.getenv('AWS_DEFAULT_REGION') or 
-        "us-west-2"
-    )
+    return os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "us-west-2"
 
 
 class AWSGenesisToolSpec(BaseToolSpec):
@@ -39,22 +35,23 @@ class AWSGenesisToolSpec(BaseToolSpec):
     ]
 
     def __init__(self, region: Optional[str] = None) -> None:
-        """Initialize the AWS Genesis tool spec.
-        
+        """
+        Initialize the AWS Genesis tool spec.
+
         Args:
             region (Optional[str]): AWS region to use for Genesis services.
                 If not provided, will try to get it from environment variables.
-        """
 
+        """
         self.region = region if region is not None else get_aws_region()
         self.browser_client = BrowserClient(self.region)
         self.code_interpreter = CodeInterpreter(self.region)
 
     def browser_start(
-        self, 
+        self,
         identifier: Optional[str] = DEFAULT_BROWSER_IDENTIFIER,
         name: Optional[str] = None,
-        session_timeout_seconds: Optional[int] = DEFAULT_BROWSER_SESSION_TIMEOUT
+        session_timeout_seconds: Optional[int] = DEFAULT_BROWSER_SESSION_TIMEOUT,
     ) -> str:
         """
         Start a browser sandbox session.
@@ -66,11 +63,12 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: The session ID of the newly created session.
+
         """
         session_id = self.browser_client.start(
             identifier=identifier,
             name=name,
-            session_timeout_seconds=session_timeout_seconds
+            session_timeout_seconds=session_timeout_seconds,
         )
         return f"Browser session started with ID: {session_id}"
 
@@ -80,23 +78,24 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: Confirmation message.
+
         """
         self.browser_client.stop()
         return "Browser session stopped"
-    
+
     def browser_ws_headers(self) -> str:
         """
         Generate WebSocket headers for connecting to the browser sandbox.
 
         Returns:
             str: The WebSocket URL and headers.
+
         """
         ws_url, headers = self.browser_client.generate_ws_headers()
         return f"WebSocket URL: {ws_url}\nHeaders: {headers}"
 
     def browser_view(
-        self, 
-        expires: Optional[int] = DEFAULT_BROWSER_LIVE_VIEW_PRESIGNED_URL_TIMEOUT
+        self, expires: Optional[int] = DEFAULT_BROWSER_LIVE_VIEW_PRESIGNED_URL_TIMEOUT
     ) -> str:
         """
         Generate a URL to view the browser session.
@@ -106,6 +105,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: The pre-signed URL for viewing the browser session.
+
         """
         url = self.browser_client.generate_live_view_url(expires=expires)
         return f"Browser view URL: {url}"
@@ -116,6 +116,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: Confirmation message.
+
         """
         self.browser_client.take_control()
         return "Took control of browser session"
@@ -126,6 +127,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: Confirmation message.
+
         """
         self.browser_client.release_control()
         return "Released control of browser session"
@@ -134,7 +136,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
         self,
         identifier: Optional[str] = DEFAULT_CODE_INTERPRETER_IDENTIFIER,
         name: Optional[str] = None,
-        session_timeout_seconds: Optional[int] = DEFAULT_CODE_INTERPRETER_TIMEOUT
+        session_timeout_seconds: Optional[int] = DEFAULT_CODE_INTERPRETER_TIMEOUT,
     ) -> str:
         """
         Start a code interpreter sandbox session.
@@ -146,11 +148,12 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: The session ID of the newly created session.
+
         """
         session_id = self.code_interpreter.start(
             identifier=identifier,
             name=name,
-            session_timeout_seconds=session_timeout_seconds
+            session_timeout_seconds=session_timeout_seconds,
         )
         return f"Code interpreter session started with ID: {session_id}"
 
@@ -160,6 +163,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: Confirmation message.
+
         """
         self.code_interpreter.stop()
         return "Code interpreter session stopped"
@@ -178,6 +182,7 @@ class AWSGenesisToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the code execution.
+
         """
         result = self.code_interpreter.invoke(method, params)
         return f"Code execution result: {result}"
