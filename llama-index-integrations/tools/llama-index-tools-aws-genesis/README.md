@@ -21,6 +21,7 @@ pip install llama-index-tools-aws-genesis
 The Genesis `browser` tools provide a way to interact with web browsers in a secure sandbox environment.
 
 Included tools:
+
 - `browser_start`: Start a browser sandbox session.
 - `browser_stop`: Stop the current browser session.
 - `browser_view`: Generate a URL to view the browser session.
@@ -65,6 +66,7 @@ print(str(stop_response))
 The Genesis `code_interpreter` tools provide a way to execute a given code method in a secure sandbox environment.
 
 Included tools:
+
 - `code_interpreter_start`: Start a code interpreter sandbox session.
 - `code_interpreter_stop`: Stop the current code interpreter session.
 - `code_interpreter_execute`: Execute code in the code interpreter sandbox.
@@ -87,7 +89,7 @@ llm = BedrockConverse(
     region_name="us-west-2",
 )
 
-prompt = f"""You are working in a Python code interpreter sandbox. 
+prompt = f"""You are working in a Python code interpreter sandbox.
 
 Task: Generate a list of 10 random integers, within 1-100.
 
