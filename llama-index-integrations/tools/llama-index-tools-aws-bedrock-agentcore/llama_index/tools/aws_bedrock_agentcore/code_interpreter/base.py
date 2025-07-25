@@ -6,7 +6,6 @@ import logging
 from typing import Dict, Optional, List
 
 from llama_index.core.tools.tool_spec.base import BaseToolSpec
-from pydantic import BaseModel, Field
 
 from bedrock_agentcore.tools.code_interpreter_client import CodeInterpreter
 
@@ -50,63 +49,6 @@ def extract_output_from_stream(response):
     return "\n".join(output)
 
 
-# Input schemas
-class ExecuteCodeInput(BaseModel):
-    """Input for ExecuteCode."""
-    code: str = Field(description="The code to execute")
-    language: str = Field(default="python", description="The programming language of the code")
-    clear_context: bool = Field(default=False, description="Whether to clear execution context")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class ExecuteCommandInput(BaseModel):
-    """Input for ExecuteCommand."""
-    command: str = Field(description="The command to execute")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class ReadFilesInput(BaseModel):
-    """Input for ReadFiles."""
-    paths: List[str] = Field(description="List of file paths to read")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class ListFilesInput(BaseModel):
-    """Input for ListFiles."""
-    directory_path: str = Field(default="", description="Path to the directory to list")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class DeleteFilesInput(BaseModel):
-    """Input for DeleteFiles."""
-    paths: List[str] = Field(description="List of file paths to delete")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class WriteFilesInput(BaseModel):
-    """Input for WriteFiles."""
-    files: List[Dict[str, str]] = Field(description="List of dictionaries with path and text fields")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class StartCommandInput(BaseModel):
-    """Input for StartCommand."""
-    command: str = Field(description="The command to execute asynchronously")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class GetTaskInput(BaseModel):
-    """Input for GetTask."""
-    task_id: str = Field(description="The ID of the task to check")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
-class StopTaskInput(BaseModel):
-    """Input for StopTask."""
-    task_id: str = Field(description="The ID of the task to stop")
-    thread_id: str = Field(default="default", description="Thread ID for the code interpreter session")
-
-
 class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
     """AWS Bedrock AgentCore Code Interpreter Tool Spec.
     
@@ -128,14 +70,23 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
     spec_functions = [
         "execute_code",
+        "aexecute_code",
         "execute_command",
+        "aexecute_command",
         "read_files",
+        "aread_files",
         "list_files",
+        "alist_files",
         "delete_files",
+        "adelete_files",
         "write_files",
+        "awrite_files",
         "start_command",
+        "astart_command",
         "get_task",
+        "aget_task",
         "stop_task",
+        "astop_task",
     ]
 
     def __init__(self, region: Optional[str] = None) -> None:
@@ -180,7 +131,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Execute code in the code interpreter sandbox.
+        Execute code in the code interpreter sandbox (synchronous version).
 
         Args:
             code (str): The code to execute.
@@ -204,6 +155,33 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error executing code: {str(e)}"
+            
+    async def aexecute_code(
+        self,
+        code: str,
+        language: str = "python",
+        clear_context: bool = False,
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Execute code in the code interpreter sandbox (asynchronous version).
+
+        Args:
+            code (str): The code to execute.
+            language (str): The programming language of the code. Default is "python".
+            clear_context (bool): Whether to clear execution context. Default is False.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The result of the code execution.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.execute_code(
+            code=code, 
+            language=language, 
+            clear_context=clear_context, 
+            thread_id=thread_id
+        )
 
     def execute_command(
         self,
@@ -211,7 +189,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Execute a shell command in the code interpreter sandbox.
+        Execute a shell command in the code interpreter sandbox (synchronous version).
 
         Args:
             command (str): The command to execute.
@@ -232,6 +210,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error executing command: {str(e)}"
+            
+    async def aexecute_command(
+        self,
+        command: str,
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Execute a shell command in the code interpreter sandbox (asynchronous version).
+
+        Args:
+            command (str): The command to execute.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The result of the command execution.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.execute_command(command=command, thread_id=thread_id)
 
     def read_files(
         self,
@@ -239,7 +235,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Read content of files in the environment.
+        Read content of files in the environment (synchronous version).
 
         Args:
             paths (List[str]): List of file paths to read.
@@ -258,6 +254,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error reading files: {str(e)}"
+            
+    async def aread_files(
+        self,
+        paths: List[str],
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Read content of files in the environment (asynchronous version).
+
+        Args:
+            paths (List[str]): List of file paths to read.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The content of the files.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.read_files(paths=paths, thread_id=thread_id)
 
     def list_files(
         self,
@@ -265,7 +279,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        List files in directories in the environment.
+        List files in directories in the environment (synchronous version).
 
         Args:
             directory_path (str): Path to the directory to list. Default is current directory.
@@ -286,6 +300,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error listing files: {str(e)}"
+            
+    async def alist_files(
+        self,
+        directory_path: str = "",
+        thread_id: str = "default",
+    ) -> str:
+        """
+        List files in directories in the environment (asynchronous version).
+
+        Args:
+            directory_path (str): Path to the directory to list. Default is current directory.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The list of files.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.list_files(directory_path=directory_path, thread_id=thread_id)
 
     def delete_files(
         self,
@@ -293,7 +325,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Remove files from the environment.
+        Remove files from the environment (synchronous version).
 
         Args:
             paths (List[str]): List of file paths to delete.
@@ -314,6 +346,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error deleting files: {str(e)}"
+            
+    async def adelete_files(
+        self,
+        paths: List[str],
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Remove files from the environment (asynchronous version).
+
+        Args:
+            paths (List[str]): List of file paths to delete.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The result of the delete operation.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.delete_files(paths=paths, thread_id=thread_id)
 
     def write_files(
         self,
@@ -321,7 +371,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Create or update files in the environment.
+        Create or update files in the environment (synchronous version).
 
         Args:
             files (List[Dict[str, str]]): List of dictionaries with path and text fields.
@@ -342,6 +392,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error writing files: {str(e)}"
+            
+    async def awrite_files(
+        self,
+        files: List[Dict[str, str]],
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Create or update files in the environment (asynchronous version).
+
+        Args:
+            files (List[Dict[str, str]]): List of dictionaries with path and text fields.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The result of the write operation.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.write_files(files=files, thread_id=thread_id)
 
     def start_command(
         self,
@@ -349,7 +417,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Start a long-running command asynchronously.
+        Start a long-running command asynchronously (synchronous version).
 
         Args:
             command (str): The command to execute asynchronously.
@@ -370,6 +438,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error starting command: {str(e)}"
+            
+    async def astart_command(
+        self,
+        command: str,
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Start a long-running command asynchronously (asynchronous version).
+
+        Args:
+            command (str): The command to execute asynchronously.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The task ID and status.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.start_command(command=command, thread_id=thread_id)
 
     def get_task(
         self,
@@ -377,7 +463,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Check status of an async task.
+        Check status of an async task (synchronous version).
 
         Args:
             task_id (str): The ID of the task to check.
@@ -396,6 +482,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error getting task status: {str(e)}"
+            
+    async def aget_task(
+        self,
+        task_id: str,
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Check status of an async task (asynchronous version).
+
+        Args:
+            task_id (str): The ID of the task to check.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The task status.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.get_task(task_id=task_id, thread_id=thread_id)
 
     def stop_task(
         self,
@@ -403,7 +507,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         thread_id: str = "default",
     ) -> str:
         """
-        Stop a running task.
+        Stop a running task (synchronous version).
 
         Args:
             task_id (str): The ID of the task to stop.
@@ -424,6 +528,24 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             return extract_output_from_stream(response)
         except Exception as e:
             return f"Error stopping task: {str(e)}"
+            
+    async def astop_task(
+        self,
+        task_id: str,
+        thread_id: str = "default",
+    ) -> str:
+        """
+        Stop a running task (asynchronous version).
+
+        Args:
+            task_id (str): The ID of the task to stop.
+            thread_id (str): Thread ID for the code interpreter session. Default is "default".
+
+        Returns:
+            str: The result of the stop operation.
+        """
+        # Use the synchronous version as the underlying API is thread-safe
+        return self.stop_task(task_id=task_id, thread_id=thread_id)
 
     async def cleanup(self, thread_id: Optional[str] = None) -> None:
         """Clean up resources
