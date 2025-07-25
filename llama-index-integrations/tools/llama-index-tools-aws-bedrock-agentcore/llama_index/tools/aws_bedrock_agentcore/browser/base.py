@@ -1,5 +1,3 @@
-"""AWS Bedrock AgentCore Browser Tool."""
-
 import os
 from typing import Optional
 

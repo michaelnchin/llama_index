@@ -8,10 +8,15 @@ This module provides tools for interacting with AWS Bedrock AgentCore's browser 
 pip install llama-index-tools-aws-bedrock-agentcore
 ```
 
+For the examples below, also install:
+```bash
+pip install llama-index llama-index-llms-bedrock-converse
+```
+
 ## Requirements
 
 - AWS credentials configured (either through environment variables or AWS CLI)
-- `bedrock-agentcore` package
+- `bedrock-agentcore` package (requires Python >= 3.10)
 - Access to AWS Bedrock AgentCore services
 
 ## Tools
@@ -32,7 +37,6 @@ Included tools:
 Example usage:
 
 ```python
-# pip install llama-index llama-index-llms-bedrock-converse llama-index-tools-aws-bedrock-agentcore
 from llama_index.core.llms import ChatMessage
 from llama_index.llms.bedrock_converse import BedrockConverse
 from llama_index.tools.aws_bedrock_agentcore import AgentCoreBrowserToolSpec
@@ -67,49 +71,57 @@ print(str(stop_response))
 
 ### Code Interpreter
 
-The Bedrock AgentCore `code_interpreter` tools provide a way to execute a given code method in a secure sandbox environment.
+The Bedrock AgentCore `code_interpreter` tools provide a way to execute code and commands in a secure sandbox environment.
 
 Included tools:
 
-- `code_interpreter_start`: Start a code interpreter sandbox session.
-- `code_interpreter_stop`: Stop the current code interpreter session.
-- `code_interpreter_execute`: Execute code in the code interpreter sandbox.
+- `execute_code`: Run code in various languages (primarily Python).
+- `execute_command`: Run shell commands.
+- `read_files`: Read content of files in the environment.
+- `list_files`: List files in directories.
+- `delete_files`: Remove files from the environment.
+- `write_files`: Create or update files.
+- `start_command`: Start long-running commands asynchronously.
+- `get_task`: Check status of async tasks.
+- `stop_task`: Stop running tasks.
 
 Example usage:
 
 ```python
-from llama_index.core.llms import ChatMessage
+import asyncio
 from llama_index.llms.bedrock_converse import BedrockConverse
 from llama_index.tools.aws_bedrock_agentcore import AgentCoreCodeInterpreterToolSpec
 from llama_index.core.agent.workflow import FunctionAgent
 
-tool_spec = AgentCoreCodeInterpreterToolSpec(region="us-west-2")
+import nest_asyncio
+nest_asyncio.apply() # In case of existing loop (ex. in JupyterLab)
 
-tools = tool_spec.to_tool_list()
-print(tools)
+async def main():
+    tool_spec = AgentCoreCodeInterpreterToolSpec(region="us-west-2")
+    tools = tool_spec.to_tool_list()
 
-llm = BedrockConverse(
-    model="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-    region_name="us-west-2",
-)
+    llm = BedrockConverse(
+        model="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        region_name="us-west-2",
+    )
 
-prompt = f"""You are working in a Python code interpreter sandbox.
+    agent = FunctionAgent(
+        tools=tools,
+        llm=llm,
+    )
 
-Task: Generate a list of 10 random integers, within 1-100.
+    code_task = "Write a Python function that calculates the factorial of a number and test it."
 
-Generate Python code to accomplish this task. Be specific and include:
-- Any necessary imports (pandas, numpy, matplotlib, json, etc are available)
-- Error handling
-- Clear output with print statements
+    code_response = await agent.run(code_task)
+    print(str(code_response))
 
-Return ONLY the Python code, no explanations."""
+    command_task = "Use terminal CLI commands to: 1) Show the environment's Python version. 2) Show me the list of Python package currently installed in the environment."
 
-resp = llm.chat([ChatMessage(role="user", content=prompt)])
+    command_response = await agent.run(command_task)
+    print(str(command_response))
 
-agent = FunctionAgent(
-    tools=tools,
-    llm=llm,
-)
+    await tool_spec.cleanup()
 
-response = await agent.run(f"Run {resp} and return the result.")
-print(str(response))
+if __name__ == "__main__":
+    asyncio.run(main())
+```
