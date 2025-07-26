@@ -1,6 +1,6 @@
 # AWS Bedrock AgentCore Tools
 
-This module provides tools for interacting with AWS Bedrock AgentCore's browser and code interpreter sandbox tools.
+This module provides tools for interacting with [AWS Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/)'s browser and code interpreter sandbox tools.
 
 ## Installation
 
@@ -13,77 +13,73 @@ For the examples below, also install:
 pip install llama-index llama-index-llms-bedrock-converse
 ```
 
-## Requirements
-
-- AWS credentials configured (either through environment variables or AWS CLI)
-- `bedrock-agentcore` package (requires Python >= 3.10)
-- Access to AWS Bedrock AgentCore services
-
-## Tools
+## Toolspecs
 
 ### Browser
 
-The Bedrock AgentCore `browser` tools provide a way to interact with web browsers in a secure sandbox environment.
+The Bedrock AgentCore `Browser` toolspec provides a set of tools for interacting with web browsers in a secure sandbox environment. It enables your LlamaIndex agents to navigate websites, extract content, click elements, and more.
 
 Included tools:
 
-- `browser_start`: Start a browser sandbox session.
-- `browser_stop`: Stop the current browser session.
-- `browser_view`: Generate a URL to view the browser session.
-- `browser_control`: Take control of the browser session.
-- `browser_release`: Release control of the browser session.
-- `browser_ws_headers`: Generate WebSocket headers for connecting to the browser sandbox.
+- `navigate_browser`: Navigate to a URL
+- `click_element`: Click on an element using CSS selectors
+- `extract_text`: Extract all text from the current webpage
+- `extract_hyperlinks`: Extract all hyperlinks from the current webpage
+- `get_elements`: Get elements matching a CSS selector
+- `navigate_back`: Navigate to the previous page
+- `current_webpage`: Get information about the current webpage
 
 Example usage:
 
 ```python
-from llama_index.core.llms import ChatMessage
+import asyncio
 from llama_index.llms.bedrock_converse import BedrockConverse
 from llama_index.tools.aws_bedrock_agentcore import AgentCoreBrowserToolSpec
 from llama_index.core.agent.workflow import FunctionAgent
 
-tool_spec = AgentCoreBrowserToolSpec(region="us-west-2")
+import nest_asyncio
+nest_asyncio.apply() # In case of existing loop (ex. in JupyterLab)
 
-tools = tool_spec.to_tool_list()
-print(tools)
+async def main():
+    tool_spec = AgentCoreBrowserToolSpec(region="us-west-2")
+    tools = tool_spec.to_tool_list()
+    
+    llm = BedrockConverse(
+        model="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        region_name="us-west-2",
+    )
+    
+    agent = FunctionAgent(
+        tools=tools,
+        llm=llm,
+    )
+    
+    task = "Go to https://news.ycombinator.com/ and tell me the titles of the top 5 posts."
 
-llm = BedrockConverse(
-    model="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-    region_name="us-west-2",
-)
+    response = await agent.run(task)
+    print(str(response))
 
-agent = FunctionAgent(
-    tools=tools,
-    llm=llm,
-)
+    await tool_spec.cleanup()
 
-start_response = await agent.run(
-    "Start a browser session and navigate to google.com."
-)
-print(str(start_response))
-view_response = await agent.run(
-    "Return a URL to view the current browser session."
-)
-print(str(view_response))
-stop_response = await agent.run("Stop the browser session.")
-print(str(stop_response))
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Code Interpreter
 
-The Bedrock AgentCore `code_interpreter` tools provide a way to execute code and commands in a secure sandbox environment.
+The Bedrock AgentCore `code_interpreter` toolspec provides a set of tools interacting with a secure code interpreter sandbox environment. It enables your LlamaIndex agents to execute code, run shell commands, manage files, and perform computational task.
 
 Included tools:
 
-- `execute_code`: Run code in various languages (primarily Python).
-- `execute_command`: Run shell commands.
-- `read_files`: Read content of files in the environment.
-- `list_files`: List files in directories.
-- `delete_files`: Remove files from the environment.
-- `write_files`: Create or update files.
-- `start_command`: Start long-running commands asynchronously.
-- `get_task`: Check status of async tasks.
-- `stop_task`: Stop running tasks.
+- `execute_code`: Run code in various languages (primarily Python)
+- `execute_command`: Run shell commands
+- `read_files`: Read content of files in the environment
+- `list_files`: List files in directories
+- `delete_files`: Remove files from the environment
+- `write_files`: Create or update files
+- `start_command`: Start long-running commands asynchronously
+- `get_task`: Check status of async tasks
+- `stop_task`: Stop running tasks
 
 Example usage:
 

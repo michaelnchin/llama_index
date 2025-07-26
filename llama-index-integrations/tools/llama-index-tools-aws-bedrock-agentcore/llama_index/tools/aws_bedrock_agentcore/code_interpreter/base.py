@@ -1,5 +1,3 @@
-"""AWS Bedrock AgentCore Code Interpreter Tool."""
-
 import json
 import os
 import logging

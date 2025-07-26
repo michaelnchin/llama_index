@@ -41,6 +41,7 @@ dependencies = [
     "boto3>=1.39.7",
     "bedrock-agentcore>=0.1.0; python_version >= '3.10'",
     "llama-index-core>=0.12.0,<0.13",
+    "playwright>=1.54.0",
 ]
 
 [tool.codespell]
