@@ -9,6 +9,7 @@ pip install llama-index-tools-aws-bedrock-agentcore
 ```
 
 For the examples below, also install:
+
 ```bash
 pip install llama-index llama-index-llms-bedrock-converse
 ```
@@ -38,28 +39,31 @@ from llama_index.tools.aws_bedrock_agentcore import AgentCoreBrowserToolSpec
 from llama_index.core.agent.workflow import FunctionAgent
 
 import nest_asyncio
-nest_asyncio.apply() # In case of existing loop (ex. in JupyterLab)
+
+nest_asyncio.apply()  # In case of existing loop (ex. in JupyterLab)
+
 
 async def main():
     tool_spec = AgentCoreBrowserToolSpec(region="us-west-2")
     tools = tool_spec.to_tool_list()
-    
+
     llm = BedrockConverse(
         model="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
         region_name="us-west-2",
     )
-    
+
     agent = FunctionAgent(
         tools=tools,
         llm=llm,
     )
-    
+
     task = "Go to https://news.ycombinator.com/ and tell me the titles of the top 5 posts."
 
     response = await agent.run(task)
     print(str(response))
 
     await tool_spec.cleanup()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -86,11 +90,15 @@ Example usage:
 ```python
 import asyncio
 from llama_index.llms.bedrock_converse import BedrockConverse
-from llama_index.tools.aws_bedrock_agentcore import AgentCoreCodeInterpreterToolSpec
+from llama_index.tools.aws_bedrock_agentcore import (
+    AgentCoreCodeInterpreterToolSpec,
+)
 from llama_index.core.agent.workflow import FunctionAgent
 
 import nest_asyncio
-nest_asyncio.apply() # In case of existing loop (ex. in JupyterLab)
+
+nest_asyncio.apply()  # In case of existing loop (ex. in JupyterLab)
+
 
 async def main():
     tool_spec = AgentCoreCodeInterpreterToolSpec(region="us-west-2")
@@ -117,6 +125,7 @@ async def main():
     print(str(command_response))
 
     await tool_spec.cleanup()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

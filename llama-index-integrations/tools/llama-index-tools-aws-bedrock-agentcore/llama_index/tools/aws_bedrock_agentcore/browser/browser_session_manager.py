@@ -33,6 +33,7 @@ class BrowserSessionManager:
 
         Args:
             region: AWS region for browser client
+
         """
         self.region = region
         self._async_sessions: Dict[str, Tuple[BrowserClient, AsyncBrowser, bool]] = {}
@@ -50,6 +51,7 @@ class BrowserSessionManager:
 
         Raises:
             RuntimeError: If the browser session is already in use by another caller
+
         """
         if thread_id in self._async_sessions:
             client, browser, in_use = self._async_sessions[thread_id]
@@ -75,6 +77,7 @@ class BrowserSessionManager:
 
         Raises:
             RuntimeError: If the browser session is already in use by another caller
+
         """
         if thread_id in self._sync_sessions:
             client, browser, in_use = self._sync_sessions[thread_id]
@@ -100,7 +103,8 @@ class BrowserSessionManager:
 
         Raises:
             Exception: If browser session creation fails
-        """  
+
+        """
         browser_client = BrowserClient(region=self.region)
 
         try:
@@ -156,6 +160,7 @@ class BrowserSessionManager:
 
         Raises:
             Exception: If browser session creation fails
+
         """
         browser_client = BrowserClient(region=self.region)
 
@@ -206,6 +211,7 @@ class BrowserSessionManager:
 
         Args:
             thread_id: Unique identifier for the thread
+
         """
         if thread_id not in self._async_sessions:
             logger.warning(f"No async browser session found for thread {thread_id}")
@@ -222,6 +228,7 @@ class BrowserSessionManager:
 
         Args:
             thread_id: Unique identifier for the thread
+
         """
         if thread_id not in self._sync_sessions:
             logger.warning(f"No sync browser session found for thread {thread_id}")
@@ -238,6 +245,7 @@ class BrowserSessionManager:
 
         Args:
             thread_id: Unique identifier for the thread
+
         """
         if thread_id not in self._async_sessions:
             logger.warning(f"No async browser session found for thread {thread_id}")
@@ -273,6 +281,7 @@ class BrowserSessionManager:
 
         Args:
             thread_id: Unique identifier for the thread
+
         """
         if thread_id not in self._sync_sessions:
             logger.warning(f"No sync browser session found for thread {thread_id}")

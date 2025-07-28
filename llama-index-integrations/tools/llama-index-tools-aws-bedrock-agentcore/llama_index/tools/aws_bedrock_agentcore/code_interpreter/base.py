@@ -27,6 +27,7 @@ def extract_output_from_stream(response):
 
     Returns:
         Extracted output as string
+
     """
     output = []
     for event in response["stream"]:
@@ -48,8 +49,9 @@ def extract_output_from_stream(response):
 
 
 class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
-    """AWS Bedrock AgentCore Code Interpreter Tool Spec.
-    
+    """
+    AWS Bedrock AgentCore Code Interpreter Tool Spec.
+
     This toolkit provides a set of tools for working with a remote code interpreter environment:
 
     * execute_code - Run code in various languages (primarily Python)
@@ -94,18 +96,21 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
         Args:
             region (Optional[str]): AWS region to use for Bedrock AgentCore services.
                 If not provided, will try to get it from environment variables.
+
         """
         self.region = region if region is not None else get_aws_region()
         self._code_interpreters: Dict[str, CodeInterpreter] = {}
 
     def _get_or_create_interpreter(self, thread_id: str = "default") -> CodeInterpreter:
-        """Get or create a code interpreter for the specified thread.
+        """
+        Get or create a code interpreter for the specified thread.
 
         Args:
             thread_id: Thread ID for the code interpreter session
 
         Returns:
             CodeInterpreter instance
+
         """
         if thread_id in self._code_interpreters:
             return self._code_interpreters[thread_id]
@@ -139,6 +144,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the code execution.
+
         """
         try:
             # Get or create code interpreter
@@ -147,13 +153,17 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
             # Execute code
             response = code_interpreter.invoke(
                 method="executeCode",
-                params={"code": code, "language": language, "clearContext": clear_context},
+                params={
+                    "code": code,
+                    "language": language,
+                    "clearContext": clear_context,
+                },
             )
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error executing code: {str(e)}"
-            
+            return f"Error executing code: {e!s}"
+
     async def aexecute_code(
         self,
         code: str,
@@ -172,13 +182,14 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the code execution.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.execute_code(
-            code=code, 
-            language=language, 
-            clear_context=clear_context, 
-            thread_id=thread_id
+            code=code,
+            language=language,
+            clear_context=clear_context,
+            thread_id=thread_id,
         )
 
     def execute_command(
@@ -195,6 +206,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the command execution.
+
         """
         try:
             # Get or create code interpreter
@@ -207,8 +219,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error executing command: {str(e)}"
-            
+            return f"Error executing command: {e!s}"
+
     async def aexecute_command(
         self,
         command: str,
@@ -223,6 +235,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the command execution.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.execute_command(command=command, thread_id=thread_id)
@@ -241,18 +254,21 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The content of the files.
+
         """
         try:
             # Get or create code interpreter
             code_interpreter = self._get_or_create_interpreter(thread_id=thread_id)
 
             # Read files
-            response = code_interpreter.invoke(method="readFiles", params={"paths": paths})
+            response = code_interpreter.invoke(
+                method="readFiles", params={"paths": paths}
+            )
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error reading files: {str(e)}"
-            
+            return f"Error reading files: {e!s}"
+
     async def aread_files(
         self,
         paths: List[str],
@@ -267,6 +283,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The content of the files.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.read_files(paths=paths, thread_id=thread_id)
@@ -285,6 +302,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The list of files.
+
         """
         try:
             # Get or create code interpreter
@@ -297,8 +315,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error listing files: {str(e)}"
-            
+            return f"Error listing files: {e!s}"
+
     async def alist_files(
         self,
         directory_path: str = "",
@@ -313,6 +331,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The list of files.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.list_files(directory_path=directory_path, thread_id=thread_id)
@@ -331,6 +350,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the delete operation.
+
         """
         try:
             # Get or create code interpreter
@@ -343,8 +363,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error deleting files: {str(e)}"
-            
+            return f"Error deleting files: {e!s}"
+
     async def adelete_files(
         self,
         paths: List[str],
@@ -359,6 +379,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the delete operation.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.delete_files(paths=paths, thread_id=thread_id)
@@ -377,6 +398,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the write operation.
+
         """
         try:
             # Get or create code interpreter
@@ -389,8 +411,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error writing files: {str(e)}"
-            
+            return f"Error writing files: {e!s}"
+
     async def awrite_files(
         self,
         files: List[Dict[str, str]],
@@ -405,6 +427,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the write operation.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.write_files(files=files, thread_id=thread_id)
@@ -423,6 +446,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The task ID and status.
+
         """
         try:
             # Get or create code interpreter
@@ -435,8 +459,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error starting command: {str(e)}"
-            
+            return f"Error starting command: {e!s}"
+
     async def astart_command(
         self,
         command: str,
@@ -451,6 +475,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The task ID and status.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.start_command(command=command, thread_id=thread_id)
@@ -469,18 +494,21 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The task status.
+
         """
         try:
             # Get or create code interpreter
             code_interpreter = self._get_or_create_interpreter(thread_id=thread_id)
 
             # Get task status
-            response = code_interpreter.invoke(method="getTask", params={"taskId": task_id})
+            response = code_interpreter.invoke(
+                method="getTask", params={"taskId": task_id}
+            )
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error getting task status: {str(e)}"
-            
+            return f"Error getting task status: {e!s}"
+
     async def aget_task(
         self,
         task_id: str,
@@ -495,6 +523,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The task status.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.get_task(task_id=task_id, thread_id=thread_id)
@@ -513,6 +542,7 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the stop operation.
+
         """
         try:
             # Get or create code interpreter
@@ -525,8 +555,8 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
             return extract_output_from_stream(response)
         except Exception as e:
-            return f"Error stopping task: {str(e)}"
-            
+            return f"Error stopping task: {e!s}"
+
     async def astop_task(
         self,
         task_id: str,
@@ -541,15 +571,18 @@ class AgentCoreCodeInterpreterToolSpec(BaseToolSpec):
 
         Returns:
             str: The result of the stop operation.
+
         """
         # Use the synchronous version as the underlying API is thread-safe
         return self.stop_task(task_id=task_id, thread_id=thread_id)
 
     async def cleanup(self, thread_id: Optional[str] = None) -> None:
-        """Clean up resources
+        """
+        Clean up resources
 
         Args:
             thread_id: Optional thread ID to clean up. If None, cleans up all sessions.
+
         """
         if thread_id:
             # Clean up a specific thread's session

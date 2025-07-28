@@ -14,12 +14,13 @@ if TYPE_CHECKING:
 async def aget_current_page(browser: Union[AsyncBrowser, Any]) -> AsyncPage:
     """
     Asynchronously get the current page of the browser.
-    
+
     Args:
         browser: The browser (AsyncBrowser) to get the current page from.
-        
+
     Returns:
         AsyncPage: The current page.
+
     """
     if not browser.contexts:
         context = await browser.new_context()
@@ -33,12 +34,13 @@ async def aget_current_page(browser: Union[AsyncBrowser, Any]) -> AsyncPage:
 def get_current_page(browser: Union[SyncBrowser, Any]) -> SyncPage:
     """
     Get the current page of the browser.
-    
+
     Args:
         browser: The browser to get the current page from.
-        
+
     Returns:
         SyncPage: The current page.
+
     """
     if not browser.contexts:
         context = browser.new_context()
